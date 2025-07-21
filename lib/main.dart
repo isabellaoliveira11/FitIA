@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: router,
+    routerConfig: appRouter,
       debugShowCheckedModeBanner: false,
       title: 'FitIA',
       theme: AppTheme.light, // 👈 aplica o nosso tema
