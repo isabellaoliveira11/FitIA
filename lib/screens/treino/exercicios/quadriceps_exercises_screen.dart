@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // IMPORTANTE
+import 'package:provider/provider.dart';
+import '../../../providers/treino_provider.dart';
+import '../../../models/treino_model.dart';
 
 class QuadricepsExercisesScreen extends StatefulWidget {
-  const QuadricepsExercisesScreen({super.key});
+  final String nomeTreino;
+
+  const QuadricepsExercisesScreen({
+    super.key,
+    required this.nomeTreino,
+  });
 
   @override
   State<QuadricepsExercisesScreen> createState() => _QuadricepsExercisesScreenState();
@@ -20,7 +29,7 @@ class _QuadricepsExercisesScreenState extends State<QuadricepsExercisesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exercícios de Quadríceps'),
+        title: Text('Treino: ${widget.nomeTreino}'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -43,17 +52,26 @@ class _QuadricepsExercisesScreenState extends State<QuadricepsExercisesScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                final selected = _exercises.entries.where((e) => e.value).map((e) => e.key).toList();
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Exercícios Selecionados'),
-                    content: Text(selected.join('\n')),
-                    actions: [
-                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Fechar'))
-                    ],
-                  ),
-                );
+                final selected = _exercises.entries
+                    .where((e) => e.value)
+                    .map((e) => e.key)
+                    .toList();
+
+                if (selected.isNotEmpty) {
+                  // Salvar no Provider
+                  final treino = TreinoModel(
+                    nome: widget.nomeTreino,
+                    exercicios: selected,
+                  );
+                  context.read<TreinoProvider>().adicionarTreino(treino);
+
+                  // Voltar para a tela de treinos
+                  context.go('/treino');
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Selecione ao menos um exercício')),
+                  );
+                }
               },
               child: const Text('Salvar Treino'),
             )

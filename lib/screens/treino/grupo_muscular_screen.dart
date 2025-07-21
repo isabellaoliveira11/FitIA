@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class GrupoMuscularScreen extends StatelessWidget {
   const GrupoMuscularScreen({super.key, required this.nomeTreino});
@@ -25,10 +26,7 @@ class GrupoMuscularScreen extends StatelessWidget {
               title: const Text('Quadríceps'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                // Aqui você pode passar também o nome do treino e o grupo muscular pra próxima tela
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Ainda não implementado')),
-                );
+                context.go('/treino/quadriceps', extra: nomeTreino);
               },
             ),
 

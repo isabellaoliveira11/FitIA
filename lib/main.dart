@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'routes/app_router.dart';
-import 'config/theme_config.dart'; // importa aqui
+import 'providers/treino_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TreinoProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -12,10 +20,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-    routerConfig: appRouter,
-      debugShowCheckedModeBanner: false,
-      title: 'FitIA',
-      theme: AppTheme.light, // 👈 aplica o nosso tema
+      routerConfig: appRouter,
     );
   }
 }
