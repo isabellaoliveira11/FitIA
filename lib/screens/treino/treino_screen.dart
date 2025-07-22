@@ -9,35 +9,55 @@ class TreinoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final treinos = context.watch<TreinoProvider>().treinos;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Meus Treinos')),
+      appBar: AppBar(
+        title: const Text('Meus Treinos'),
+        centerTitle: true,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // LISTA DINÂMICA
             Expanded(
               child: treinos.isEmpty
-                  ? const Center(child: Text("Nenhum treino adicionado ainda."))
-                  : ListView.builder(
+                  ? Center(
+                      child: Text(
+                        "Nenhum treino adicionado ainda.",
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    )
+                  : ListView.separated(
                       itemCount: treinos.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final treino = treinos[index];
                         return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 3,
                           child: ListTile(
-                            title: Text(treino.nome),
-                            subtitle: Text(treino.exercicios.join(', ')),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            title: Text(
+                              treino.nome,
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              treino.exercicios.join(', '),
+                              style: theme.textTheme.bodySmall,
+                            ),
+                            trailing: const Icon(Icons.chevron_right),
                             onTap: () {
-                              // futuramente: ir para detalhes do treino
+                              context.go('/treino/detalhes', extra: treino);
                             },
                           ),
                         );
                       },
                     ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () => context.go('/treino/novo'),
               icon: const Icon(Icons.add),
@@ -45,7 +65,7 @@ class TreinoScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),

@@ -5,6 +5,10 @@ import '../screens/treino/treino_screen.dart';
 import '../screens/treino/novo_treino_screen.dart';
 import '../screens/treino/grupo_muscular_screen.dart';
 import '../screens/treino/exercicios/quadriceps_exercises_screen.dart';
+import '../screens/treino/exercicios/treino_ativo_screen.dart';
+import '../screens/treino/exercicios/detalhes_exercicio_screen.dart';
+import '../screens/treino/detalhes_treino_screen.dart';
+import '../models/treino_model.dart';
 
 final GoRouter appRouter = GoRouter(
   routes: [
@@ -38,5 +42,27 @@ final GoRouter appRouter = GoRouter(
         return QuadricepsExercisesScreen(nomeTreino: nomeTreino);
       },
     ),
+    GoRoute(
+      path: '/treino/detalhes',
+      builder: (context, state) {
+        final treino = state.extra as TreinoModel;
+        return DetalhesTreinoScreen(treino: treino);
+      },
+    ),
+    GoRoute(
+      path: '/treino/ativo',
+      builder: (context, state) {
+        final treino = state.extra as TreinoModel;
+        return TreinoAtivoScreen(treino: treino);
+      },
+    ),
+      GoRoute(
+      path: '/treino/exercicio',
+      builder: (context, state) {
+        final nomeExercicio = state.extra as String;
+        return DetalhesExercicioScreen(nomeExercicio: nomeExercicio);
+      },
+    ),
+
   ],
 );
