@@ -23,8 +23,7 @@ class FitIAApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
-      theme: AppTheme.light,
-      themeMode: ThemeMode.system, // alterna automaticamente
+      theme: AppTheme.light, // 🌞 Tema claro e elegante ativado
     );
   }
 }

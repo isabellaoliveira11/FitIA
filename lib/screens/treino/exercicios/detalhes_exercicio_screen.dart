@@ -1,112 +1,126 @@
 import 'package:flutter/material.dart';
 
-class DetalhesExercicioScreen extends StatelessWidget {
+class DetalhesExercicioScreen extends StatefulWidget {
   final String nomeExercicio;
 
-  const DetalhesExercicioScreen({
-    super.key,
-    required this.nomeExercicio,
-  });
+  const DetalhesExercicioScreen({super.key, required this.nomeExercicio});
+
+  @override
+  State<DetalhesExercicioScreen> createState() => _DetalhesExercicioScreenState();
+}
+
+class _DetalhesExercicioScreenState extends State<DetalhesExercicioScreen> {
+  final TextEditingController pesoController = TextEditingController();
+  final TextEditingController repsController = TextEditingController();
+  final List<String> historico = [];
+
+  void _adicionarSerie() {
+    final peso = pesoController.text.trim();
+    final reps = repsController.text.trim();
+
+    if (peso.isEmpty || reps.isEmpty) return;
+
+    final hora = TimeOfDay.now().format(context);
+    setState(() {
+      historico.add('$peso kg x $reps rep. - $hora');
+      pesoController.clear();
+      repsController.clear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // sem dark mode
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          '1/9 $nomeExercicio',
+          '1/9 ${widget.nomeExercicio}',
           style: const TextStyle(color: Colors.black),
         ),
-        actions: [
-          const Padding(
+        actions: const [
+          Padding(
             padding: EdgeInsets.only(right: 16.0),
             child: Text(
-              '0:03',
-              style: TextStyle(
-                color: Colors.black54,
-                fontSize: 16,
-              ),
+              '00:03',
+              style: TextStyle(color: Color.fromARGB(136, 206, 183, 204)),
             ),
           ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.asset(
-                'assets/images/legpress.png', // imagem fixa por enquanto
-                height: 220,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/legpress.png',
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+
+            const SizedBox(height: 20),
             Row(
               children: [
                 Text(
-                  nomeExercicio,
+                  widget.nomeExercicio,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.info_outline, size: 20, color: Colors.blueGrey),
+                const Icon(Icons.info_outline, color: Colors.grey),
               ],
             ),
-            const SizedBox(height: 24),
 
+            const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildIndicador('Repetições\nsugeridas', '-', color: Colors.lightBlue),
-                _buildIndicador('Descanso', '⛔', color: Colors.redAccent),
-                _buildIndicador('Séries feitas', '0', color: Colors.grey.shade700),
+                _buildIndicador('Repetições\nsugeridas', '-', Icons.repeat, Colors.blue),
+                _buildIndicador('Descanso', '⏸️', Icons.timer_off, Colors.orange),
+                _buildIndicador('Séries feitas', '${historico.length}', Icons.check, Colors.teal),
               ],
             ),
-            const SizedBox(height: 24),
 
+            const SizedBox(height: 28),
             const Text(
-              'Adicionar comentário',
-              style: TextStyle(
-                color: Colors.blueAccent,
-                fontWeight: FontWeight.w500,
-              ),
+              'Nova Série',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.black87,
-                    ),
-                    child: const Text('Quilos'),
+                  child: TextField(
+                    controller: pesoController,
+                    keyboardType: TextInputType.number,
+                    decoration: _buildInputStyle('Quilos'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.black87,
-                    ),
-                    child: const Text('Repetições'),
+                  child: TextField(
+                    controller: repsController,
+                    keyboardType: TextInputType.number,
+                    decoration: _buildInputStyle('Repetições'),
                   ),
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _adicionarSerie,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor: Colors.black,
                     foregroundColor: Colors.white,
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(14),
@@ -115,64 +129,66 @@ class DetalhesExercicioScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
 
+            const SizedBox(height: 32),
             const Text(
               'Histórico',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 12),
-            _buildHistorico('Seg., 14/07/2025', [
-              '140 kg x 12 rep. - 19:34',
-              '140 kg x 8 rep. - 19:31',
-              '130 kg x 10 rep. - 19:27',
-            ]),
+            const SizedBox(height: 8),
+
+            if (historico.isEmpty)
+              const Text('Nenhuma série registrada ainda.')
+            else
+              ...historico.reversed.map((linha) => ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      linha,
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                      onPressed: () {
+                        setState(() {
+                          historico.remove(linha);
+                        });
+                      },
+                    ),
+                  )),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildIndicador(String label, String valor, {Color? color}) {
+  Widget _buildIndicador(String label, String valor, IconData icon, Color cor) {
     return Column(
       children: [
         CircleAvatar(
-          radius: 30,
-          // ignore: deprecated_member_use
-          backgroundColor: color?.withOpacity(0.1) ?? Colors.grey.shade200,
-          child: Text(
-            valor,
-            style: TextStyle(
-              color: color ?? Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          backgroundColor: cor.withOpacity(0.1),
+          radius: 28,
+          child: Icon(icon, color: cor),
         ),
         const SizedBox(height: 6),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 13),
-        )
+          style: const TextStyle(fontSize: 12.5),
+        ),
       ],
     );
   }
 
-  Widget _buildHistorico(String data, List<String> registros) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          data,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 6),
-        ...registros.map((item) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Text(item),
-            )),
-      ],
+  InputDecoration _buildInputStyle(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
     );
   }
 }

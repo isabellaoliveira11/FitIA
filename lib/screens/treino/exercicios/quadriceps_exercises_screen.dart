@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // IMPORTANTE
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../providers/treino_provider.dart';
 import '../../../models/treino_model.dart';
@@ -7,10 +7,7 @@ import '../../../models/treino_model.dart';
 class QuadricepsExercisesScreen extends StatefulWidget {
   final String nomeTreino;
 
-  const QuadricepsExercisesScreen({
-    super.key,
-    required this.nomeTreino,
-  });
+  const QuadricepsExercisesScreen({super.key, required this.nomeTreino});
 
   @override
   State<QuadricepsExercisesScreen> createState() => _QuadricepsExercisesScreenState();
@@ -25,58 +22,153 @@ class _QuadricepsExercisesScreenState extends State<QuadricepsExercisesScreen> {
     'Agachamento no Smith': false,
   };
 
+  void _limparSelecao() {
+    setState(() {
+      _exercises.updateAll((key, value) => false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final selecionados = _exercises.values.where((v) => v).length;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Treino: ${widget.nomeTreino}'),
+        title: Text(widget.nomeTreino),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: _exercises.keys.map((exercise) {
-                  return CheckboxListTile(
-                    title: Text(exercise),
-                    value: _exercises[exercise],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _exercises[exercise] = value ?? false;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
+      body: Column(
+        children: [
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Selecionado: $selecionados',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
-            ElevatedButton(
-              onPressed: () {
-                final selected = _exercises.entries
-                    .where((e) => e.value)
-                    .map((e) => e.key)
-                    .toList();
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _exercises.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final nome = _exercises.keys.elementAt(index);
+                final selecionado = _exercises[nome]!;
 
-                if (selected.isNotEmpty) {
-                  // Salvar no Provider
-                  final treino = TreinoModel(
-                    nome: widget.nomeTreino,
-                    exercicios: selected,
-                  );
-                  context.read<TreinoProvider>().adicionarTreino(treino);
-
-                  // Voltar para a tela de treinos
-                  context.go('/treino');
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Selecione ao menos um exercício')),
-                  );
-                }
+                return InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    setState(() {
+                      _exercises[nome] = !selecionado;
+                    });
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        const BoxShadow(
+                          color: Color.fromRGBO(0, 0, 0, 0.03),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            'assets/images/leg-press.png', // troque conforme o exercício
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            nome,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          selecionado
+                              ? Icons.check_circle_rounded
+                              : Icons.radio_button_unchecked,
+                          color: selecionado ? Colors.teal : Colors.grey.shade300,
+                        )
+                      ],
+                    ),
+                  ),
+                );
               },
-              child: const Text('Salvar Treino'),
-            )
-          ],
-        ),
+            ),
+          ),
+
+          // Botões de ação fixos
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _limparSelecao,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: const BorderSide(color: Colors.grey),
+                    ),
+                    child: const Text(
+                      'LIMPAR',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final selected = _exercises.entries
+                          .where((e) => e.value)
+                          .map((e) => e.key)
+                          .toList();
+
+                      if (selected.isNotEmpty) {
+                        final treino = TreinoModel(
+                          nome: widget.nomeTreino,
+                          exercicios: selected,
+                        );
+                        context.read<TreinoProvider>().adicionarTreino(treino);
+                        context.go('/treino');
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Selecione ao menos um exercício'),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      'ADICIONAR',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

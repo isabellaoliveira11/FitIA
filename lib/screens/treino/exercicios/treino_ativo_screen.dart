@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../models/treino_model.dart';
 
@@ -16,7 +17,63 @@ class TreinoAtivoScreen extends StatefulWidget {
 }
 
 class _TreinoAtivoScreenState extends State<TreinoAtivoScreen> {
-  int seriesFeitas = 0;
+  final TextEditingController pesoController = TextEditingController();
+  final TextEditingController repsController = TextEditingController();
+  final List<String> historico = [];
+  late Timer _timer;
+  int _elapsedSeconds = 0;
+
+  int get seriesFeitas => historico.length;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      setState(() {
+        _elapsedSeconds++;
+      });
+    });
+  }
+
+  void _resetTimer() {
+    _timer.cancel();
+    _elapsedSeconds = 0;
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    pesoController.dispose();
+    repsController.dispose();
+    super.dispose();
+  }
+
+  void _adicionarSerie() {
+    final peso = pesoController.text.trim();
+    final reps = repsController.text.trim();
+
+    if (peso.isEmpty || reps.isEmpty) return;
+
+    final hora = TimeOfDay.now().format(context);
+    setState(() {
+      historico.add('$peso kg x $reps rep. - $hora');
+      pesoController.clear();
+      repsController.clear();
+    });
+
+    _resetTimer();
+  }
+
+  String _formatTime(int totalSeconds) {
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,83 +81,150 @@ class _TreinoAtivoScreenState extends State<TreinoAtivoScreen> {
     final totalExercicios = widget.treino.exercicios.length;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('${widget.indiceExercicio + 1}/$totalExercicios $exercicioAtual'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: Colors.black),
+        title: Text(
+          '${widget.indiceExercicio + 1}/$totalExercicios',
+          style: const TextStyle(color: Colors.black, fontSize: 18),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Imagem do exercício
             Center(
-              child: Image.asset(
-                'assets/images/${exercicioAtual.toLowerCase().replaceAll(' ', '')}.png',
-                height: 150,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Text(
-                    'Imagem não encontrada',
-                    style: TextStyle(color: Colors.red),
-                  );
-                },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  'assets/images/teste.png',
+                  height: 180,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              exercicioAtual,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildInfoBox('$seriesFeitas', 'Séries feitas', color: Colors.grey.shade800),
+                _buildInfoBox(_formatTime(_elapsedSeconds), 'Descanso atual', color: const Color(0xFF7CB77A)),
+              ],
+            ),
+            const SizedBox(height: 28),
+            const Text(
+              'Nova Série',
+              style: TextStyle(
+                color: Color(0xFF7CB77A),
+                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
-
-            Text(
-              exercicioAtual,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildInfoCircle('-', 'Repetições\nsugeridas'),
-                _buildInfoCircle('⏸️', 'Descanso'),
-                _buildInfoCircle('$seriesFeitas', 'Séries feitas'),
+                Expanded(
+                  child: TextField(
+                    controller: pesoController,
+                    keyboardType: TextInputType.number,
+                    decoration: _buildInputStyle('Quilos'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: repsController,
+                    keyboardType: TextInputType.number,
+                    decoration: _buildInputStyle('Repetições'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: _adicionarSerie,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7CB77A),
+                    foregroundColor: Colors.white,
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(14),
+                  ),
+                  child: const Icon(Icons.add),
+                ),
               ],
             ),
-
-            const SizedBox(height: 16),
-            const Text(
-              'Adicionar comentário',
-              style: TextStyle(color: Colors.blue),
-            ),
-            const SizedBox(height: 12),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                _BotaoCinza(texto: 'Quilos'),
-                _BotaoCinza(texto: 'Repetições'),
-                Icon(Icons.add_circle, color: Colors.teal),
-              ],
-            ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             const Text(
               'Histórico',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 8),
-            const Text('Seg., 14/07/2025'),
-            const Text('140 kg x 12 rep. - 19:34'),
-            const Text('140 kg x 8 rep. - 19:31'),
-            const Text('130 kg x 10 rep. - 19:27'),
-
-            const Spacer(),
-
+            const SizedBox(height: 12),
+            Expanded(
+              child: historico.isEmpty
+                  ? const Text('Nenhuma série registrada ainda.')
+                  : ListView.builder(
+                      itemCount: historico.length,
+                      itemBuilder: (context, index) {
+                        final item = historico[index];
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item,
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, color: Colors.orangeAccent),
+                                    onPressed: () {
+                                      // implementar edição se quiser depois
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                                    onPressed: () {
+                                      setState(() {
+                                        historico.removeAt(index);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            const SizedBox(height: 16),
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton.icon(
                 onPressed: _avancarParaProximoExercicio,
                 icon: const Icon(Icons.arrow_forward),
                 label: const Text('Próximo'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7CB77A),
+                  foregroundColor: Colors.white,
+                ),
               ),
             ),
           ],
@@ -109,24 +233,44 @@ class _TreinoAtivoScreenState extends State<TreinoAtivoScreen> {
     );
   }
 
-  Widget _buildInfoCircle(String valor, String label) {
+  Widget _buildInfoBox(String valor, String label, {Color? color}) {
     return Column(
       children: [
-        CircleAvatar(
-          radius: 24,
-          backgroundColor: Colors.grey.shade200,
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          decoration: BoxDecoration(
+            color: (color ?? Colors.grey).withAlpha(30),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Text(
             valor,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              color: color ?? Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12),
+          style: const TextStyle(fontSize: 13),
         ),
       ],
+    );
+  }
+
+  InputDecoration _buildInputStyle(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
     );
   }
 
@@ -142,25 +286,7 @@ class _TreinoAtivoScreenState extends State<TreinoAtivoScreen> {
         ),
       );
     } else {
-      Navigator.pop(context); // Final do treino
+      Navigator.pop(context);
     }
-  }
-}
-
-class _BotaoCinza extends StatelessWidget {
-  final String texto;
-
-  const _BotaoCinza({required this.texto});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(texto),
-    );
   }
 }
