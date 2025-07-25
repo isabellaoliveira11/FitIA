@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../models/treino_model.dart';
+import '..//relatorio_treino_screen.dart'; // Ajuste o import conforme sua estrutura
 
 class TreinoAtivoScreen extends StatefulWidget {
   final TreinoModel treino;
@@ -194,9 +195,7 @@ class _TreinoAtivoScreenState extends State<TreinoAtivoScreen> {
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.edit, color: Colors.orangeAccent),
-                                    onPressed: () {
-                                      // implementar edição se quiser depois
-                                    },
+                                    onPressed: () {},
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -215,18 +214,45 @@ class _TreinoAtivoScreenState extends State<TreinoAtivoScreen> {
                     ),
             ),
             const SizedBox(height: 16),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton.icon(
-                onPressed: _avancarParaProximoExercicio,
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text('Próximo'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7CB77A),
-                  foregroundColor: Colors.white,
+            if (widget.indiceExercicio == totalExercicios - 1)
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => RelatorioTreinoScreen(
+                          nomeTreino: widget.treino.nome,
+                        ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.check_circle_outline),
+                  label: const Text('Finalizar Treino'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              )
+            else
+              Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton.icon(
+                  onPressed: _avancarParaProximoExercicio,
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('Próximo'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7CB77A),
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

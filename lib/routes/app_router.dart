@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+
 import '../screens/home_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/treino/treino_screen.dart';
@@ -8,6 +9,8 @@ import '../screens/treino/exercicios/quadriceps_exercises_screen.dart';
 import '../screens/treino/exercicios/treino_ativo_screen.dart';
 import '../screens/treino/exercicios/detalhes_exercicio_screen.dart';
 import '../screens/treino/detalhes_treino_screen.dart';
+import '../screens/treino/relatorio_treino_screen.dart'; // ✅ import necessário
+
 import '../models/treino_model.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -56,13 +59,23 @@ final GoRouter appRouter = GoRouter(
         return TreinoAtivoScreen(treino: treino);
       },
     ),
-      GoRoute(
-      path: '/treino/exercicio',
+    GoRoute(
+      path: '/detalhesExercicio',
       builder: (context, state) {
-        final nomeExercicio = state.extra as String;
-        return DetalhesExercicioScreen(nomeExercicio: nomeExercicio);
+        final args = state.extra as Map<String, dynamic>;
+        return DetalhesExercicioScreen(
+          nomeExercicio: args['nomeExercicio'],
+          indexAtual: args['indexAtual'],
+          totalExercicios: args['totalExercicios'],
+        );
       },
     ),
-
+    GoRoute(
+      path: '/relatorio',
+      builder: (context, state) {
+        final nomeTreino = state.extra as String? ?? 'Treino';
+        return RelatorioTreinoScreen(nomeTreino: nomeTreino);
+      },
+    ),
   ],
 );

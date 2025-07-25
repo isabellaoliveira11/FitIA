@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 
 class DetalhesExercicioScreen extends StatefulWidget {
   final String nomeExercicio;
+  final int indexAtual;
+  final int totalExercicios;
 
-  const DetalhesExercicioScreen({super.key, required this.nomeExercicio});
+  const DetalhesExercicioScreen({
+    super.key,
+    required this.nomeExercicio,
+    required this.indexAtual,
+    required this.totalExercicios,
+  });
 
   @override
   State<DetalhesExercicioScreen> createState() => _DetalhesExercicioScreenState();
@@ -37,7 +44,7 @@ class _DetalhesExercicioScreenState extends State<DetalhesExercicioScreen> {
         elevation: 0,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          '1/9 ${widget.nomeExercicio}',
+          '${widget.indexAtual + 1}/${widget.totalExercicios} ${widget.nomeExercicio}',
           style: const TextStyle(color: Colors.black),
         ),
         actions: const [
@@ -155,6 +162,29 @@ class _DetalhesExercicioScreenState extends State<DetalhesExercicioScreen> {
                       },
                     ),
                   )),
+
+            if (widget.indexAtual == widget.totalExercicios - 1)
+              Padding(
+                padding: const EdgeInsets.only(top: 24.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/relatorioTreino');
+                    },
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: const Text('Finalizar Treino'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart'; // IMPORTANTE!
 import 'routes/app_router.dart';
 import 'providers/treino_provider.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Necessário com await
+  await initializeDateFormatting('pt_BR', null); // Inicializa o locale
   runApp(
     MultiProvider(
       providers: [
@@ -23,7 +26,7 @@ class FitIAApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
-      theme: AppTheme.light, // 🌞 Tema claro e elegante ativado
+      theme: AppTheme.light,
     );
   }
 }

@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const HomeHeader(),
                 const SizedBox(height: 32),
 
-                // CALENDÁRIO SEMANAL
+                // CALENDÁRIO MENSAL FIXO
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -50,10 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         _focusedDay = focusedDay;
                       });
                     },
-                    calendarFormat: CalendarFormat.week,
-                    availableCalendarFormats: const {
-                      CalendarFormat.week: 'Semana',
+                    onPageChanged: (focusedDay) {
+                      setState(() {
+                        _focusedDay = focusedDay;
+                      });
                     },
+                    calendarFormat: CalendarFormat.month,
                     headerVisible: false,
                     calendarStyle: const CalendarStyle(
                       selectedDecoration: BoxDecoration(

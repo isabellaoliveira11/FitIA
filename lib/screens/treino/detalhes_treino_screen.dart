@@ -27,14 +27,30 @@ class DetalhesTreinoScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            ...treino.exercicios.map(
-              (ex) => Card(
-                child: ListTile(
-                  leading: const Icon(Icons.fitness_center),
-                  title: Text(ex),
+              ...treino.exercicios.map(
+          (ex) => Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            elevation: 2,
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(12),
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/teste.png', // depois você pode mudar para: '${ex.toLowerCase().replaceAll(' ', '')}.png'
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
                 ),
               ),
+              title: Text(
+                ex,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
             ),
+          ),
+        ),
+
 
             const SizedBox(height: 24),
 
